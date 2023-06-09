@@ -1,0 +1,144 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// ©2023 by Quinn James                                                                //
+// https://github.com/qcjames53/EasyWorldPortals                                       //
+// This project is distributed under the GPLv3 license; see LICENSE for more info.     //
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// This class contains functions which help with the setup and configuration
+// of world portals. These functions are intended to be called manually.
+class helpers {
+
+    // Summon a portal centered in the block, grant it an ID, and briefly show
+    // its location.
+    //
+    // Run at the coordinates you'd like to summon the portal.
+    function summon() {
+        summon marker ~ ~ ~ {Tags:["portal"]};
+        helpers.center();
+        helpers.grant_id();
+        helpers.set_directionless();
+        helpers.show_all();
+    }
+
+    // Center the portal on the current block.
+    //
+    // Run nearby the portal's coordinates and it will be located.
+    function center() {
+        execute as @e[type=marker, tag=portal, sort=nearest, limit=1] at @s align xyz positioned ~0.5 ~ ~0.5 run tp @s ~ ~ ~;
+    }
+
+    // Grant the portal the next free portal id.
+    //
+    // Run nearby the portal's coordinates and it will be located.
+    function grant_id() {
+        scoreboard players set #current_portal_id v 0;
+        $id_unset = 1;
+        while($id_unset == 1) {
+            scoreboard players set #is_valid_portal_id v 1;
+            execute as @e[type=marker,tag=portal] if score @s portal_id = 
+                #current_portal_id v run scoreboard players set #is_valid_portal_id v 0;
+            execute if score #is_valid_portal_id v matches 1 run {
+                scoreboard players operation @e[type=marker, tag=portal, sort=nearest, limit=1]
+                    portal_id = #current_portal_id v;
+                $id_unset = 0;
+                tellraw @a [{"text":"Set portal id as "},{"score":{"name":"#current_portal_id","objective":"v"}}];
+            }
+            scoreboard players add #current_portal_id v 1;
+        }
+    }
+
+    // Set the portal as directionless (non-functional).
+    //
+    // Run nearby the portal's coordinates and it will be located.
+    function set_directionless() {
+        scoreboard players set @e[type=marker, tag=portal, sort=nearest, limit=1] 
+            portal_direction -1;
+    }
+
+    // Show portal IDs and particles to assist with debugging.
+    //
+    // Run as anything.
+    function show_all() {
+        helpers.show_ids();
+        helpers.show_particles();
+    }
+
+    // Show particles indicating portal direction and the location of portal 
+    // boundaries (if active). Uses the following scheme:
+    //     Unset:        white
+    //     North-facing: yellow
+    //     East-facing:  red
+    //     South-facing: blue
+    //     West-facing:  cyan
+    //     Left helper:  magenta
+    //     Right helper: green
+    //
+    // Run as anything
+    function show_particles() {
+        // unset
+        execute at @e[type=marker, tag=portal, scores={portal_direction=-1}] run particle minecraft:dust 1.0 1.0 1.0 1.0;
+        // north
+        execute at @e[type=marker, tag=portal, scores={portal_direction=0}] run {
+            particle minecraft:dust 1.0 1.0 0.0 1.0;
+            execute positioned ~ ~ ~-1 run particle minecraft:dust 1.0 1.0 1.0 0.5;
+        }
+        // east
+        execute at @e[type=marker, tag=portal, scores={portal_direction=1}] run {
+            particle minecraft:dust 1.0 0.0 0.0 1.0;
+            execute positioned ~1 ~ ~ run particle minecraft:dust 1.0 1.0 1.0 0.5;
+        }
+        // south
+        execute at @e[type=marker, tag=portal, scores={portal_direction=2}] run {
+            particle minecraft:dust 0.0 0.0 1.0 1.0;
+            execute positioned ~ ~ ~1 run particle minecraft:dust 1.0 1.0 1.0 0.5;
+        }
+        // west
+        execute at @e[type=marker, tag=portal, scores={portal_direction=3}] run {
+            particle minecraft:dust 0.0 1.0 1.0 1.0;
+            execute positioned ~-1 ~ ~ run particle minecraft:dust 1.0 1.0 1.0 0.5;
+        }
+
+        // helpers
+        execute at @e[type=marker, tag=portal_l_helper] run particle minecraft:dust 1.0 0.0 1.0 1.0;
+        execute at @e[type=marker, tag=portal_r_helper] run particle minecraft:dust 0.0 1.0 0.0 1.0;
+    }
+
+    // Briefly show text information about the portal in the folowing scheme:
+    //     portal_id -> portal_target
+    // The portal id will render red if the portal is active.
+    // 
+    // Run as anything.
+    function show_ids() {
+        execute as @e[type=marker, tag=portal] at @s run {
+            summon text_display ~ ~0.5 ~ 
+                {billboard:"center",Tags:["portal_id_text"],text:'{"text":"foo"}'};
+            scoreboard players operation @e[type=text_display, sort=nearest, limit=1] 
+                portal_id = @s portal_id;
+            scoreboard players operation @e[type=text_display, sort=nearest, limit=1] 
+                portal_target = @s portal_target;
+            data merge entity @e[type=minecraft:text_display,sort=nearest,limit=1] 
+                {text:'[{"score":{"name":"@s","objective":"portal_id"}},{"text":" -> "},{"score":{"name":"@s","objective":"portal_target"}}]'};
+            execute if entity @s[tag=portal_active] run 
+                data merge entity @e[type=minecraft:text_display,sort=nearest,limit=1] 
+                {text:'[{"score":{"name":"@s","objective":"portal_id"}, "color":"red"},{"text":" -> "},{"score":{"name":"@s","objective":"portal_target"}}]'};
+        }
+
+        schedule 3s {
+            kill @e[type=text_display, tag=portal_id_text];
+        }
+    }
+
+    // Close all active portals. Useful if shit hits the fan.
+    //
+    // Run as anything.
+    function close_all() {
+        execute as @e[type=marker,tag=portal,tag=portal_active] run close();
+    }
+
+    // Open the nearest portal.
+    //
+    // Run nearby the portal you wish to open.
+    function open_nearest() {
+        execute as @e[type=marker,tag=portal,sort=nearest,limit=1] run open();
+    }
+}

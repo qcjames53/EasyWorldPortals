@@ -1,0 +1,7 @@
+{
+    "namespace": "portal",
+    "description": "Datapack for world portals",
+    "pack_format": "15",
+    "target": "portal.jmc",
+    "output": "."
+}

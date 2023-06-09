@@ -1,0 +1,210 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// ©2023 by Quinn James                                                                //
+// https://github.com/qcjames53/EasyWorldPortals                                       //
+// This project is distributed under the GPLv3 license; see LICENSE for more info.     //
+/////////////////////////////////////////////////////////////////////////////////////////
+
+// A class containing the 'private' functions for world portals. These should
+// not be accessed from your data pack, as things may break.
+class computations {
+
+    // Determines if an x,z tile is visible as a destination tile through the
+    // active world portal.
+    //
+    // Run as a marker entity positioned at the x,z tile you wish to test.
+    // Note: this does not require the marker to be tp'd beforehand.
+    //
+    // Returns #is_destination_tile v of 1 if visible, 0 otherwise.
+    function is_destination_tile() {
+        // get needed angles
+        execute facing entity @p feet rotated ~ 0 run {
+            tp @s ~ ~ ~ ~ ~;
+            $rot_to_player = data get entity @s Rotation[0];
+        }
+        execute facing entity @e[type=marker, tag=portal_r_helper] feet rotated ~ 0 run {
+            tp @s ~ ~ ~ ~ ~;
+            $rot_to_r = data get entity @s Rotation[0];
+        }
+        execute facing entity @e[type=marker, tag=portal_l_helper] feet rotated ~ 0 run {
+            tp @s ~ ~ ~ ~ ~;
+            $rot_to_l = data get entity @s Rotation[0];
+        }
+
+        // if the portal is south-facing, mod the angles
+        execute if score #current_portal_direction v matches 2 run {
+            $rot_to_player %= 360;
+            $rot_to_r %= 360;
+            $rot_to_l %= 360;
+        }
+
+        // return the result of the visibility calculations
+        if (($rot_to_l > $rot_to_player) && ($rot_to_player > $rot_to_r)) {
+            scoreboard players set #is_destination_tile v 1;
+        } else {
+            scoreboard players set #is_destination_tile v 0;
+        }
+    }
+
+    // Sets up neccesary portal operations and seamlessly teleports player when
+    // a player enters a portal.
+    // 
+    // Run as and at the source portal.
+    function walk_through() {
+        close();
+        summon marker ~ ~ ~ {Tags:["portal_tp_helper","portal_tp_helper_a"]};
+        execute as @e[type=marker,tag=portal_tp_helper_a] at @s facing entity @p feet run tp @s ~ ~ ~ ~ ~;
+        scoreboard players operation #current_portal_target v = @s portal_target;
+        execute as @e[type=minecraft:marker,tag=portal] 
+            if score #current_portal_target v = @s portal_id at @s run {
+
+            open();
+            summon marker ~ ~ ~ {Tags:["portal_tp_helper","portal_tp_helper_b"]};
+            execute as @e[type=marker,tag=portal_tp_helper_b] at @s rotated as @e[type=marker,tag=portal_tp_helper_a] run tp @s ~ ~ ~ ~ ~; 
+        }
+
+        // use a pretty clever technique to teleport relative to two entities
+        // while maintaining momentum
+        execute as @e[type=marker, tag=portal_tp_helper_a] run {
+            while(entity @e[tag=portal_tp_helper]) {
+                execute at @s if entity @p[distance=..0.01] run {
+                    execute as @p at @s positioned as @e[type=marker,tag=portal_tp_helper_b] run tp @p ~ ~ ~ ~ ~;
+                    kill @e[type=marker, tag=portal_tp_helper];
+                }
+                execute as @e[type=marker, tag=portal_tp_helper] at @s run {
+                    tp @s ^ ^ ^0.01;
+                }
+            }
+        }
+
+        kill @e[type=marker, tag=portal_tp_helper];
+    }
+
+    // Run the visibility calculations for a north facing portal
+    //
+    // Run as and at the portal.
+    function tick_n() {
+        // this is neccessary until JMC is updated for execute summon :(
+        JMC.put("execute summon marker at @s run function portal:computations/tick_n_locals");
+
+        // check for player going through portal
+        execute positioned ~-1 ~ ~-1.31 if entity @p[dx=2,dy=2,dz=0] run {
+            execute at @s run computations.walk_through();
+        }
+    }
+
+    // Iterates over all potentially visible blocks in the transition range,
+    // cloning the correct blocks for each tile.
+    //
+    // Run as a temporary marker entity positioned at the source portal.
+    function tick_n_locals() {
+        Hardcode.repeatLists(
+            indexStrings=["<x>","<z>"],
+            stringLists=[
+                ['-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10'],
+                ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1']
+            ],
+            function=()=>{
+                execute positioned ~<x> ~ ~<z> run computations.is_destination_tile();
+                execute if score #is_destination_tile v matches 1 run clone <x> 10 <z> <x> 14 <z> ~<x> ~-1 ~<z>;
+                execute if score #is_destination_tile v matches 0 run clone <x> 0 <z> <x> 4 <z> ~<x> ~-1 ~<z>;
+            }
+        );
+        kill @s;
+    }
+
+    // Run the visibility calculations for a east facing portal
+    //
+    // Run as and at the portal.
+    function tick_e() {
+        JMC.put("execute summon marker at @s run function portal:computations/tick_e_locals");
+
+        // check for player going through portal
+        execute positioned ~0.31 ~ ~-1 if entity @p[dx=0,dy=2,dz=2] run {
+            execute at @s run computations.walk_through();
+        }
+    }
+
+    // Iterates over all potentially visible blocks in the transition range,
+    // cloning the correct blocks for each tile.
+    //
+    // Run as a temporary marker entity positioned at the source portal.
+    function tick_e_locals() {
+        Hardcode.repeatLists(
+            indexStrings=["<x>","<z>"],
+            stringLists=[
+                ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10'],
+                ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+            ],
+            function=()=>{
+                execute positioned ~<x> ~ ~<z> run computations.is_destination_tile();
+                execute if score #is_destination_tile v matches 1 run clone <x> 10 <z> <x> 14 <z> ~<x> ~-1 ~<z>;
+                execute if score #is_destination_tile v matches 0 run clone <x> 0 <z> <x> 4 <z> ~<x> ~-1 ~<z>;
+            }
+        );
+        kill @s;
+    }
+
+    // Run the visibility calculations for a south facing portal
+    //
+    // Run as and at the portal.
+    function tick_s() {
+        JMC.put("execute summon marker at @s run function portal:computations/tick_s_locals");
+
+        // check for player going through portal
+        execute positioned ~-1 ~ ~0.31 if entity @p[dx=2,dy=2,dz=0] run {
+            execute at @s run computations.walk_through();
+        }
+    }
+
+    // Iterates over all potentially visible blocks in the transition range,
+    // cloning the correct blocks for each tile.
+    //
+    // Run as a temporary marker entity positioned at the source portal.
+    function tick_s_locals() {
+        Hardcode.repeatLists(
+            indexStrings=["<x>","<z>"],
+            stringLists=[
+                ['-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '2', '2', '2', '2', '2', '2', '2', '2', '2', '2', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '4', '4', '4', '4', '4', '4', '4', '4', '4', '4', '5', '5', '5', '5', '5', '5', '5', '5', '5', '5', '6', '6', '6', '6', '6', '6', '6', '6', '6', '6', '7', '7', '7', '7', '7', '7', '7', '7', '7', '7', '8', '8', '8', '8', '8', '8', '8', '8', '8', '8', '9', '9', '9', '9', '9', '9', '9', '9', '9', '9', '10', '10', '10', '10', '10', '10', '10', '10', '10', '10'],
+                ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+            ],
+            function=()=>{
+                execute positioned ~<x> ~ ~<z> run computations.is_destination_tile();
+                execute if score #is_destination_tile v matches 1 run clone <x> 10 <z> <x> 14 <z> ~<x> ~-1 ~<z>;
+                execute if score #is_destination_tile v matches 0 run clone <x> 0 <z> <x> 4 <z> ~<x> ~-1 ~<z>;
+            }
+        );
+        kill @s;
+    }
+
+    // Run the visibility calculations for a west facing portal
+    //
+    // Run as and at the portal.
+    function tick_w() {
+        JMC.put("execute summon marker at @s run function portal:computations/tick_w_locals");
+
+        // check for player going through portal
+        execute positioned ~-1.31 ~ ~-1 if entity @p[dx=0,dy=2,dz=2] run {
+            execute at @s run computations.walk_through();
+        }
+    }
+
+    // Iterates over all potentially visible blocks in the transition range,
+    // cloning the correct blocks for each tile.
+    //
+    // Run as a temporary marker entity positioned at the source portal.
+    function tick_w_locals() {
+        Hardcode.repeatLists(
+            indexStrings=["<x>","<z>"],
+            stringLists=[
+                ['-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-10', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-9', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-8', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-7', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-6', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-5', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-4', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-3', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-2', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1', '-1'],
+                ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+            ],
+            function=()=>{
+                execute positioned ~<x> ~ ~<z> run computations.is_destination_tile();
+                execute if score #is_destination_tile v matches 1 run clone <x> 10 <z> <x> 14 <z> ~<x> ~-1 ~<z>;
+                execute if score #is_destination_tile v matches 0 run clone <x> 0 <z> <x> 4 <z> ~<x> ~-1 ~<z>;
+            }
+        );
+        kill @s;
+    }
+}

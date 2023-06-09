@@ -1,0 +1,167 @@
+/////////////////////////////////////////////////////////////////////////////////////////
+// ©2023 by Quinn James                                                                //
+// https://github.com/qcjames53/EasyWorldPortals                                       //
+// This project is distributed under the GPLv3 license; see LICENSE for more info.     //
+/////////////////////////////////////////////////////////////////////////////////////////
+
+import "computations";
+import "helpers";
+
+///////////////////////////////////////////////////////////////////////////////
+// Setup                                                                     //
+///////////////////////////////////////////////////////////////////////////////
+
+// This data pack was built with JMC build 1.2.14 (bundled as .bin)
+// https://github.com/WingedSeal/jmc/tree/1c4209041ea6ef75c8f129367746ce64e28c488a
+// To compile changes, run ./JMC.bin compile in the root folder of the datapack.
+
+// Uncomment the function below to test the data-pack standalone.
+// If you're including this as a part of another data pack, I recommend calling
+// tick() from within the main data pack. 
+// function __tick__() { tick(); }
+
+// Required scoreboard objectives created on load
+scoreboard objectives add v dummy;
+scoreboard objectives add portal_direction dummy;
+scoreboard objectives add portal_id dummy;
+scoreboard objectives add portal_target dummy;
+scoreboard objectives add portal_width dummy;
+scoreboard players set #portal_particles v 0; // modify to 1 to show debug particles
+
+// Uncomment the line below to recieve error messages.
+// tag @a add portal_debug_info;
+
+///////////////////////////////////////////////////////////////////////////////
+// Below are the "public" functions for the world portals. These functions   //
+// can and should be directly accessed by your data pack.                    //
+///////////////////////////////////////////////////////////////////////////////
+
+// Renders the illusion zone behind the active portal from the perspective
+// of the nearest player.
+//
+// Call as anything once per tick.
+function tick() {
+    execute as @e[type=marker, tag=portal, tag=portal_active] at @s run {
+        execute if score @s portal_direction matches 0 run computations.tick_n();
+        execute if score @s portal_direction matches 1 run computations.tick_e();
+        execute if score @s portal_direction matches 2 run computations.tick_s();
+        execute if score @s portal_direction matches 3 run computations.tick_w();
+    }
+
+    // debug particles
+    execute if score #portal_particles v matches 1 run helpers.show_particles();
+}
+
+// Opens a portal and begins rendering the illusion zone.
+// WARNING - ONLY OPEN ONE PORTAL AT A TIME!
+// Opening multiple portals will destroy world geometry.
+// 
+// Call as the portal entity you wish to open.
+function open() {
+    // skip everything if another portal is open
+    if(! entity @e[type=marker, tag=portal_active]) {
+        // run the correct clones to set up portals
+        // NOTE: this requires 1 to 1 connections to be maintained
+        execute at @s run clone ~-10 ~-1 ~-10 ~10 ~3 ~10 -10 0 -10;
+        scoreboard players operation #current_portal_direction v = @s portal_direction;
+        scoreboard players operation #current_portal_target v = @s portal_target;
+        execute as @e[type=minecraft:marker,tag=portal] 
+            if score #current_portal_target v = @s portal_id at @s run 
+            clone ~-10 ~-1 ~-10 ~10 ~3 ~10 -10 10 -10;
+        tag @s add portal_active;
+
+        // summon the portal helper entities
+        // north facing
+        execute if score @s portal_direction matches 0 at @s run {
+            execute if score @s portal_width matches 1 run {
+                execute positioned ~-1 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~1 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 2 run {
+                execute positioned ~-1 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 3 run {
+                execute positioned ~-2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+        }
+        // east facing
+        execute if score @s portal_direction matches 1 at @s run {
+            execute if score @s portal_width matches 1 run {
+                execute positioned ~ ~ ~-1 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~1 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 2 run {
+                execute positioned ~ ~ ~-1 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~2 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 3 run {
+                execute positioned ~ ~ ~-2 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~2 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            
+        }
+        // south facing
+        execute if score @s portal_direction matches 2 at @s run {
+            execute if score @s portal_width matches 1 run {
+                execute positioned ~1 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~-1 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 2 run {
+                execute positioned ~2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~-1 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 3 run {
+                execute positioned ~2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~-2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+        }
+        // west facing
+        execute if score @s portal_direction matches 3 at @s run {
+            execute if score @s portal_width matches 1 run {
+                execute positioned ~ ~ ~1 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~-1 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 2 run {
+                execute positioned ~ ~ ~2 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~-1 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 3 run {
+                execute positioned ~ ~ ~2 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~-2 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            
+        }
+    } else {
+        tellraw @a [{"text":"Portal error - ","color":"red"},{"text":"Tried to open portal ","color":"reset"},{"score":{"name":"@s","objective":"portal_id"}},{"text":", but portal "},{"score":{"name":"@e[type=marker, tag=portal_active,limit=1]","objective":"portal_id"}},{"text":" was already open"}];
+    }
+}
+
+// Closes a portal and resets all modified blocks.
+// 
+// Call as the portal you wish to close. 
+function close() {
+    // skip if the portal is already inactive
+    if(entity @s[type=marker, tag=portal_active]) {
+        // clone portal source to source
+        execute if score @s portal_direction matches 0 at @s run {
+            clone -10 0 -10 10 4 -1 ~-10 ~-1 ~-10;
+        }
+        execute if score @s portal_direction matches 1 at @s run {
+            clone 1 0 -10 10 4 10 ~1 ~-1 ~-10;
+        }
+        execute if score @s portal_direction matches 2 at @s run {
+            clone -10 0 10 10 4 1 ~-10 ~-1 ~1;
+        }
+        execute if score @s portal_direction matches 3 at @s run {
+            clone -10 0 -10 -1 4 10 ~-10 ~-1 ~-10;
+        }
+
+        tag @s remove portal_active;
+        kill @e[type=marker, tag=portal_l_helper];
+        kill @e[type=marker, tag=portal_r_helper];
+    } else {
+        tellraw @a [{"text":"Portal error - ","color":"red"},{"text":"Tried to close inactive portal ","color":"reset"},{"score":{"name":"@s","objective":"portal_id"}}];
+    }
+}
