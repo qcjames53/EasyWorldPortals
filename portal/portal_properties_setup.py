@@ -2,10 +2,10 @@
 # field of the portals. Modify the globals below to change the shape.
 
 # Globals
-MAX_PORTAL_WIDTH = 3
-FIELD_WIDTH = 17
-FIELD_HEIGHT = 17
-RADIUS = 15 # set to -1 to ignore
+MAX_PORTAL_WIDTH = 5
+FIELD_WIDTH = 15
+FIELD_HEIGHT = 15
+RADIUS = -1 # set to -1 to ignore
 HEADER_FILE_NAME = "portal.hjmc"
 
 import curses
@@ -126,10 +126,10 @@ def save_tile_pairs(tile_pairs):
         lines = f.readlines()
     with open(HEADER_FILE_NAME, "w") as f:
         for line in lines:
-            if line.strip("\n") == "// AUTO-GENERATED CONTENT BELOW - DO NOT MODIFY":
+            if line.strip("\n") == "// AUTO-GENERATED CONTENT BELOW - USE PORTAL PROPERTIES SCRIPT TO MODIFY":
                 break
             f.write(line)
-        f.write("// AUTO-GENERATED CONTENT BELOW - DO NOT MODIFY\n")
+        f.write("// AUTO-GENERATED CONTENT BELOW - USE PORTAL PROPERTIES SCRIPT TO MODIFY\n")
         f.write(f"#define NSTRINGLISTX {nstringx}\n")
         f.write(f"#define NSTRINGLISTZ {nstringz}\n")
         f.write(f"#define ESTRINGLISTX {estringx}\n")

@@ -1,6 +1,5 @@
-execute if score @s portal_width matches 1 run function portal:__private__/anonymous/26
-execute if score @s portal_width matches 2 run function portal:__private__/anonymous/27
-execute if score @s portal_width matches 3 run function portal:__private__/anonymous/28
+execute positioned ~3 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]}
+execute positioned ~-2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]}
 
 
 # ©2023 by Quinn James

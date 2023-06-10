@@ -18,7 +18,7 @@ import "helpers";
 // Uncomment the function below to test the data-pack standalone.
 // If you're including this as a part of another data pack, I recommend calling
 // tick() from within the main data pack. 
-function __tick__() { tick(); }
+// function __tick__() { tick(); }
 
 // Required scoreboard objectives created on load
 scoreboard objectives add v dummy;
@@ -26,6 +26,7 @@ scoreboard objectives add portal_direction dummy;
 scoreboard objectives add portal_id dummy;
 scoreboard objectives add portal_target dummy;
 scoreboard objectives add portal_width dummy;
+scoreboard objectives add portal_open_on_travel dummy;
 scoreboard players set #portal_particles v 0; // modify to 1 to show debug particles
 
 // Uncomment the line below to recieve error messages.
@@ -62,12 +63,13 @@ function open() {
     if(! entity @e[type=marker, tag=portal_active]) {
         // run the correct clones to set up portals
         // NOTE: this requires 1 to 1 connections to be maintained
-        execute at @s run clone ~-10 ~-1 ~-10 ~10 ~3 ~10 -10 0 -10;
+        execute at @s run clone ~-15 ~-1 ~-15 ~15 ~5 ~15 -15 0 -15;
         scoreboard players operation #current_portal_direction v = @s portal_direction;
         scoreboard players operation #current_portal_target v = @s portal_target;
+        scoreboard players operation #current_portal_open_on_travel v = @s portal_open_on_travel;
         execute as @e[type=minecraft:marker,tag=portal] 
             if score #current_portal_target v = @s portal_id at @s run 
-            clone ~-10 ~-1 ~-10 ~10 ~3 ~10 -10 10 -10;
+            clone ~-15 ~-1 ~-15 ~15 ~5 ~15 -15 10 -15;
         tag @s add portal_active;
 
         // summon the portal helper entities
@@ -85,6 +87,14 @@ function open() {
                 execute positioned ~-2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
                 execute positioned ~2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
             }
+            execute if score @s portal_width matches 4 run {
+                execute positioned ~-2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~3 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 5 run {
+                execute positioned ~-3 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~3 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
         }
         // east facing
         execute if score @s portal_direction matches 1 at @s run {
@@ -100,7 +110,14 @@ function open() {
                 execute positioned ~ ~ ~-2 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
                 execute positioned ~ ~ ~2 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
             }
-            
+            execute if score @s portal_width matches 4 run {
+                execute positioned ~ ~ ~-2 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~3 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 5 run {
+                execute positioned ~ ~ ~-3 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~3 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
         }
         // south facing
         execute if score @s portal_direction matches 2 at @s run {
@@ -115,6 +132,14 @@ function open() {
             execute if score @s portal_width matches 3 run {
                 execute positioned ~2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
                 execute positioned ~-2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 4 run {
+                execute positioned ~3 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~-2 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 5 run {
+                execute positioned ~3 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~-3 ~ ~ run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
             }
         }
         // west facing
@@ -131,7 +156,14 @@ function open() {
                 execute positioned ~ ~ ~2 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
                 execute positioned ~ ~ ~-2 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
             }
-            
+            execute if score @s portal_width matches 4 run {
+                execute positioned ~ ~ ~3 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~-2 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
+            execute if score @s portal_width matches 5 run {
+                execute positioned ~ ~ ~3 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]};
+                execute positioned ~ ~ ~-3 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]};
+            }
         }
     } else {
         tellraw @a [{"text":"Portal error - ","color":"red"},{"text":"Tried to open portal ","color":"reset"},{"score":{"name":"@s","objective":"portal_id"}},{"text":", but portal "},{"score":{"name":"@e[type=marker, tag=portal_active,limit=1]","objective":"portal_id"}},{"text":" was already open"}];
@@ -146,16 +178,16 @@ function close() {
     if(entity @s[type=marker, tag=portal_active]) {
         // clone portal source to source
         execute if score @s portal_direction matches 0 at @s run {
-            clone -10 0 -10 10 4 -1 ~-10 ~-1 ~-10;
+            clone -15 0 -15 15 6 -1 ~-15 ~-1 ~-15;
         }
         execute if score @s portal_direction matches 1 at @s run {
-            clone 1 0 -10 10 4 10 ~1 ~-1 ~-10;
+            clone 1 0 -15 15 6 15 ~1 ~-1 ~-15;
         }
         execute if score @s portal_direction matches 2 at @s run {
-            clone -10 0 10 10 4 1 ~-10 ~-1 ~1;
+            clone -15 0 15 15 6 1 ~-15 ~-1 ~1;
         }
         execute if score @s portal_direction matches 3 at @s run {
-            clone -10 0 -10 -1 4 10 ~-10 ~-1 ~-10;
+            clone -15 0 -15 -1 6 15 ~-15 ~-1 ~-15;
         }
 
         tag @s remove portal_active;

@@ -1,5 +1,5 @@
-execute positioned ~ ~ ~-2 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]}
-execute positioned ~ ~ ~2 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]}
+execute positioned ~ ~ ~-1 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]}
+execute positioned ~ ~ ~1 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]}
 
 
 # ©2023 by Quinn James

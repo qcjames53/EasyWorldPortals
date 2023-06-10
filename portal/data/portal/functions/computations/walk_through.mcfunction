@@ -1,4 +1,5 @@
 function portal:close
+execute as @e[type=minecraft:marker,tag=portal] if score #current_portal_open_on_travel v = @s portal_id at @s run function portal:open
 summon marker ~ ~ ~ {Tags:["portal_tp_helper","portal_tp_helper_a"]}
 execute as @e[type=marker,tag=portal_tp_helper_a] at @s facing entity @p feet run tp @s ~ ~ ~ ~ ~
 scoreboard players operation #current_portal_target v = @s portal_target

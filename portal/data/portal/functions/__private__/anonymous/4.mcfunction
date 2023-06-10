@@ -1,4 +1,3 @@
-function portal:open
 summon marker ~ ~ ~ {Tags:["portal_tp_helper","portal_tp_helper_b"]}
 execute as @e[type=marker,tag=portal_tp_helper_b] at @s rotated as @e[type=marker,tag=portal_tp_helper_a] run tp @s ~ ~ ~ ~ ~
 
