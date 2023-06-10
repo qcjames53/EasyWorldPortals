@@ -1,5 +1,5 @@
-tp @s ~ ~ ~ ~ ~
-execute store result score $rot_to_l __variable__ run data get entity @s Rotation[0]
+execute positioned ~ ~ ~3 run summon marker ~ ~ ~ {Tags:["portal_l_helper"]}
+execute positioned ~ ~ ~-2 run summon marker ~ ~ ~ {Tags:["portal_r_helper"]}
 
 
 # ©2023 by Quinn James

@@ -3,4 +3,4 @@ tellraw @a [{"text":"Portal error - ","color":"red"},{"text":"Tried to close ina
 
 # ©2023 by Quinn James
 # https://github.com/qcjames53/EasyWorldPortals
-# This project is distributed under the GPLv3 license; see LICENSE.txt for more info.
+# This project is distributed under the GPLv3 license; see the LICENSE file for more info.
