@@ -4,4 +4,4 @@ execute positioned ~-1.31 ~ ~-1 if entity @p[dx=0,dy=2,dz=2] at @s run function 
 
 # ©2023 by Quinn James
 # https://github.com/qcjames53/EasyWorldPortals
-# This project is distributed under the GPLv3 license; see LICENSE.txt for more info.
+# This project is distributed under the GPLv3 license; see the LICENSE file for more info.

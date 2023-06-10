@@ -65,7 +65,7 @@ class computations {
         // use a pretty clever technique to teleport relative to two entities
         // while maintaining momentum
         execute as @e[type=marker, tag=portal_tp_helper_a] run {
-            while(entity @e[tag=portal_tp_helper]) {
+            while(entity @s) {
                 execute at @s if entity @p[distance=..0.01] run {
                     execute as @p at @s positioned as @e[type=marker,tag=portal_tp_helper_b] run tp @p ~ ~ ~ ~ ~;
                     kill @e[type=marker, tag=portal_tp_helper];

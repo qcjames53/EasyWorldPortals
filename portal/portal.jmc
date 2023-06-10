@@ -18,7 +18,7 @@ import "helpers";
 // Uncomment the function below to test the data-pack standalone.
 // If you're including this as a part of another data pack, I recommend calling
 // tick() from within the main data pack. 
-// function __tick__() { tick(); }
+function __tick__() { tick(); }
 
 // Required scoreboard objectives created on load
 scoreboard objectives add v dummy;

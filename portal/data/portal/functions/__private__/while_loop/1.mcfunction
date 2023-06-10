@@ -7,4 +7,4 @@ execute if score $id_unset __variable__ matches 1 run function portal:__private_
 
 # ©2023 by Quinn James
 # https://github.com/qcjames53/EasyWorldPortals
-# This project is distributed under the GPLv3 license; see LICENSE.txt for more info.
+# This project is distributed under the GPLv3 license; see the LICENSE file for more info.

@@ -1,5 +1,4 @@
-tp @s ~ ~ ~ ~ ~
-execute store result score $rot_to_l __variable__ run data get entity @s Rotation[0]
+function portal:tick
 
 
 # ©2023 by Quinn James
