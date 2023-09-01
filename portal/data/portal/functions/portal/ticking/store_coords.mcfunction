@@ -1,0 +1,1 @@
+$data modify storage minecraft:portal iz.$(side)$(row) set value $(col)

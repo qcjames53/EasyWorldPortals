@@ -18,20 +18,16 @@ scoreboard players operation #temp_z v -= #trigger_source_z v
 
 # Get source and destination trigger properties + convert to usable units
 execute store result score #tp_rotation v run data get entity @s data.tp_rotation 1
-execute store result score #source_x_width v run data get entity @s data.x_width 1
-execute store result score #source_z_width v run data get entity @s data.z_width 1
+execute store result score #source_x_width v run data get entity @s data.x_width 100
+execute store result score #source_z_width v run data get entity @s data.z_width 100
 $execute as @e[tag=trigger,scores={trigger_id=$(tp_id)},limit=1] \
-    store result score #destination_x_width v run data get entity @s data.x_width 1
+    store result score #destination_x_width v run data get entity @s data.x_width 100
 $execute as @e[tag=trigger,scores={trigger_id=$(tp_id)},limit=1] \
-    store result score #destination_z_width v run data get entity @s data.z_width 1
-scoreboard players add #source_x_width v 1
-scoreboard players add #source_z_width v 1
-scoreboard players add #destination_x_width v 1
-scoreboard players add #destination_z_width v 1
-scoreboard players operation #source_x_width v *= #100 v
-scoreboard players operation #source_z_width v *= #100 v
-scoreboard players operation #destination_x_width v *= #100 v
-scoreboard players operation #destination_z_width v *= #100 v
+    store result score #destination_z_width v run data get entity @s data.z_width 100
+scoreboard players add #source_x_width v 100
+scoreboard players add #source_z_width v 100
+scoreboard players add #destination_x_width v 100
+scoreboard players add #destination_z_width v 100
 
 # Find the final offset
 execute if score #tp_rotation v matches 0 run function portal:trigger/offset_0
@@ -63,3 +59,8 @@ data modify storage minecraft:portal input.offset_z set string storage minecraft
 # Put all in storage and call actual tp
 $execute as @e[tag=trigger,scores={trigger_id=$(tp_id)},limit=1] at @s run \
     function portal:trigger/tp_0 with storage minecraft:portal input
+
+# if the player is teleporting from a iz_source, close the portal
+execute if entity @s[tag=iz_source] run function portal:portal/close_all
+
+# if the next trigger has a tp_id of the current trigger, open it in the opposite direction
