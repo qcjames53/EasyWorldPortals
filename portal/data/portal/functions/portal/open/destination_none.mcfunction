@@ -1,0 +1,1 @@
+say [portal:portal\open\destination_none] Tried to open portal with none direction set

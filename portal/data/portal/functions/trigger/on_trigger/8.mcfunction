@@ -1,0 +1,1 @@
+execute as @p at @s run tp @s ~ ~20 ~

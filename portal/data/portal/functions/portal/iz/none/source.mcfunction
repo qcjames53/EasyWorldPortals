@@ -1,0 +1,1 @@
+say called source with none direction set

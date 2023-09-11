@@ -61,6 +61,8 @@ $execute as @e[tag=trigger,scores={trigger_id=$(tp_id)},limit=1] at @s run \
     function portal:trigger/tp_0 with storage minecraft:portal input
 
 # if the player is teleporting from a iz_source, close the portal
-execute if entity @s[tag=iz_source] run function portal:portal/close_all
+$data merge storage minecraft:portal {tp_id:$(tp_id)}
+$execute if entity @s[tag=iz_source] as @e[tag=trigger,scores={trigger_id=$(tp_id)},limit=1] at @s run \
+    function portal:trigger/tp_1 with storage minecraft:portal
 
 # if the next trigger has a tp_id of the current trigger, open it in the opposite direction
