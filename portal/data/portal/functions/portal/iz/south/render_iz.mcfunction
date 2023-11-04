@@ -1,3 +1,7 @@
+# Render the illusion zone around the south-facing source trigger, respecting stored iz boundaries.
+# $say portal:portal/iz/south/render_iz inputs: $(height) $(l0) $(l1) $(l2) $(l3) $(l4) $(l5) $(l6) $(l7) $(l8) $(l9) $(l10) $(l11) $(l12) $(l13) $(l14) $(l15) $(l16) $(r0) $(r1) $(r2) $(r3) $(r4) $(r5) $(r6) $(r7) $(r8) $(r9) $(r10) $(r11) $(r12) $(r13) $(r14) $(r15) $(r16)
+# Run as active source trigger entity at position.
+
 # Clone the base level in
 clone -16 -49 0 16 -31 16 ~-16 ~-1 ~
 

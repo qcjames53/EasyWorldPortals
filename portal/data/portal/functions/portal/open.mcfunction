@@ -1,11 +1,9 @@
-# Opens a world portal at a given trigger in a given direction
+# Opens a world portal at a given trigger in a given direction. Rejects duplicate requests.
 # $say portal:portal/open inputs: $(trigger_id) $(direction)
+# Run as server or op'd player
 
-# close all Portals
-function portal:portal/close_all
-
-$data merge storage minecraft:portal {iz_direction:"$(direction)"}
-$execute as @e[tag=trigger,scores={trigger_id=$(trigger_id)}] at @s run \
-    function portal:portal/open/source with entity @s data
-
-scoreboard players set #iz_active v 1
+$execute unless score #iz_last_opened v matches $(trigger_id) run function portal:portal/open0 {\
+    trigger_id:$(trigger_id), direction:$(direction)}
+$execute if score #iz_last_opened v matches $(trigger_id) run tellraw @a[tag=portal_log] {\
+    "color":"red", "text":"Consecutive portal open. Skipping id $(trigger_id)"}
+$scoreboard players set #iz_last_opened v $(trigger_id)

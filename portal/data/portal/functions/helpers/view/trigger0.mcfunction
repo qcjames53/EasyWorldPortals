@@ -1,6 +1,8 @@
-# Summons a block display at the current coordinates of given size
-# $say helpers/view/trigger_0 inputs: $(x_width) $(y_width) $(z_width) $(block_type) \
+# Summons a block display at the current coordinates of given size, text description, and debug
+# trail pointing to the linked destination trigger.
+# $say helpers/view/trigger0 inputs: $(x_width) $(y_width) $(z_width) $(block_type) \
     $(x_width_half) $(y_width_half) $(z_width_half) $(id) $(tp_id)
+# Run as trigger entity at entity position.
 
 # Show the trigger zone
 $summon block_display ~ ~ ~ {\
@@ -20,4 +22,4 @@ $execute positioned ~ ~0.25 ~ run summon text_display ~$(x_width_half) ~$(y_widt
 scoreboard players set #trail_len v 100
 $execute positioned ~$(x_width_half) ~$(y_width_half) ~$(z_width_half) facing entity \
     @e[tag=trigger,scores={trigger_id=$(tp_id)},limit=1] feet run \
-    function portal:helpers/view/trigger_1 {tp_id:$(tp_id)}
+    function portal:helpers/view/trigger1 {tp_id:$(tp_id)}

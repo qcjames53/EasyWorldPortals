@@ -1,5 +1,6 @@
 # Displays the activation box of a trigger. Run as at trigger.
 # $say helpers/view/trigger inputs: $(x_width) $(y_width) $(z_width) $(tp_id)
+# Run as trigger entity at entity position.
 
 # Add 1 to all the widths so the border displays properly and store half widths for later
 $scoreboard players set #t v $(x_width)
@@ -28,7 +29,8 @@ data modify storage minecraft:portal input.z_width_half set string storage minec
 
 # Add trigger properties to params
 $scoreboard players set #tp_id v $(tp_id)
-execute store result storage minecraft:portal input.id int 1 run scoreboard players get @s trigger_id
+execute store result storage minecraft:portal input.id int 1 run scoreboard players get @s \
+    trigger_id
 execute store result storage minecraft:portal input.tp_id int 1 run scoreboard players get #tp_id v
 
 # Set the display block based on status
@@ -53,4 +55,4 @@ execute if score #tp_id v matches 0.. if entity @s[tag=active] unless entity @s[
 execute if score #tp_id v matches 0.. if entity @s[tag=active] if entity @s[tag=on_trigger] \
     run data modify storage minecraft:portal input merge value {block_type:"white_stained_glass"}
 
-function portal:helpers/view/trigger_0 with storage minecraft:portal input
+function portal:helpers/view/trigger0 with storage minecraft:portal input

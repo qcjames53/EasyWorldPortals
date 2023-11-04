@@ -1,3 +1,6 @@
+# A helper function to generate protected scratch space at 0,0.
+# No inputs
+# Run as op'd player.
 
 # Remove all existing scratch space
 fill -17 -50 -17 17 -31 17 air

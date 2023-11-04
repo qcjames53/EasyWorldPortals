@@ -1,4 +1,7 @@
-# Run every tick
+# Called once per tick
+# No inputs
+# Run as server
+
 scoreboard players add #tick_count v 1
 
 # check all activated triggers for players
