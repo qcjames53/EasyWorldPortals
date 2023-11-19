@@ -1,5 +1,6 @@
-# Get the relative location (in blocks) of the current entity compared to the world position of the
-# active illusion zone source marker. Save the offset to #rc_x and #rc_z and kill current entity.
+# Get the relative location (in blocks) of the current entity compared to the 
+#   world position of the active illusion zone source marker. Save the offset to
+#   #rc_x and #rc_z and kill current entity.
 # No inputs
 # Run as temp marker entity at current block test position.
 

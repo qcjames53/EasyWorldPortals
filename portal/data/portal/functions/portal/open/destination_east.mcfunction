@@ -1,4 +1,5 @@
-# Open the iz facing east. Clone the destination tiles to scratch with an appropriate offset.
+# Open the iz facing east. Clone the destination tiles to scratch with an 
+#   appropriate offset.
 # No inputs.
 # Run as destination trigger entity at position.
 

@@ -1,4 +1,5 @@
-# Open the iz facing south. Clone the destination tiles to scratch with an appropriate offset.
+# Open the iz facing south. Clone the destination tiles to scratch with an \
+#   appropriate offset.
 # $say portal:portal/open/destination_south inputs: $(z_width)
 # Run as destination trigger entity at position.
 
