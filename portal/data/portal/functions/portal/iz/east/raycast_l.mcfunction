@@ -3,6 +3,8 @@
 # No inputs
 # Run as active source trigger entity at current raycast position.
 
+particle minecraft:dust 1 0 0 0.5 ~ ~ ~ 0 0 0 1 1
+
 execute positioned ~0.5 ~ ~0.5 summon minecraft:marker run function portal:portal/iz/get_offset
 execute store result storage input row int 1 run scoreboard players get #rc_x v
 execute store result storage input col int 1 run scoreboard players get #rc_z v
@@ -16,5 +18,5 @@ execute if score #rc_depth v matches 1.. if score #rc_z v matches ..-16 \
     positioned ~ ~ ~1 rotated -90 ~ run function portal:portal/iz/east/raycast_l
 execute if score #rc_depth v matches 1.. if score #rc_z v matches 16.. \
     positioned ~ ~ ~-1 rotated -90 ~ run function portal:portal/iz/east/raycast_l
-execute if score #rc_depth v matches 1.. positioned ^ ^ ^1 run function \
+execute if score #rc_depth v matches 1.. positioned ^ ^ ^0.5 run function \
     portal:portal/iz/east/raycast_l

@@ -16,5 +16,5 @@ execute if score #rc_depth v matches 1.. if score #rc_x v matches ..-16 \
     positioned ~1 ~ ~ rotated 0 ~ run function portal:portal/iz/south/raycast_l
 execute if score #rc_depth v matches 1.. if score #rc_x v matches 16.. \
     positioned ~-1 ~ ~ rotated 0 ~ run function portal:portal/iz/south/raycast_l
-execute if score #rc_depth v matches 1.. positioned ^ ^ ^1 run function \
+execute if score #rc_depth v matches 1.. positioned ^ ^ ^0.5 run function \
     portal:portal/iz/south/raycast_l
