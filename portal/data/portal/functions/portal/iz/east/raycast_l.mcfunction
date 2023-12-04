@@ -1,6 +1,5 @@
 # Run the left boundary raycast (recursively) to determine left-edge of illusion 
-#   zone to render.
-# Store the determined offsets in nbt storage.
+#   zone to render. Store the determined offsets in nbt storage.
 # No inputs
 # Run as active source trigger entity at current raycast position.
 
@@ -16,9 +15,10 @@ scoreboard players remove #rc_depth v 1
 execute unless score #rc_x v matches -15..15 run scoreboard players set \
     #rc_depth v 0
 execute if score #rc_depth v matches 1.. if score #rc_z v matches ..-16 \
-    positioned ~ ~ ~1 rotated -90 ~ run function portal:portal/iz/east/raycast_l
+    positioned ~ ~ ~1 rotated -90 ~ positioned ^ ^ ^0.5 run function \
+    portal:portal/iz/east/raycast_l
 execute if score #rc_depth v matches 1.. if score #rc_z v matches 16.. \
-    positioned ~ ~ ~-1 rotated -90 ~ run \
-    function portal:portal/iz/east/raycast_l
+    rotated -90 ~ positioned ^ ^ ^0.5 run function \
+    portal:portal/iz/east/raycast_l
 execute if score #rc_depth v matches 1.. positioned ^ ^ ^0.5 run function \
     portal:portal/iz/east/raycast_l

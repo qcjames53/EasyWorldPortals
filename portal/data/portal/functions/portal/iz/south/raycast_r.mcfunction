@@ -15,8 +15,10 @@ scoreboard players remove #rc_depth v 1
 execute unless score #rc_z v matches -15..15 run scoreboard players set \
     #rc_depth v 0
 execute if score #rc_depth v matches 1.. if score #rc_x v matches ..-16 \
-    positioned ~1 ~ ~ rotated 0 ~ run function portal:portal/iz/south/raycast_r
+    positioned ~1 ~ ~ rotated 0 ~ positioned ^ ^ ^0.5 run \
+    function portal:portal/iz/south/raycast_r
 execute if score #rc_depth v matches 1.. if score #rc_x v matches 16.. \
-    positioned ~-1 ~ ~ rotated 0 ~ run function portal:portal/iz/south/raycast_r
+    rotated 0 ~ positioned ^ ^ ^0.5 run function \
+    portal:portal/iz/south/raycast_r
 execute if score #rc_depth v matches 1.. positioned ^ ^ ^0.5 run function \
     portal:portal/iz/south/raycast_r

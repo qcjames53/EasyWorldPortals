@@ -16,4 +16,4 @@ summon block_display ~ ~ ~ {\
 scoreboard players remove #trail_len v 1
 $execute if score #trail_len v matches 1.. unless entity \
     @e[tag=trigger,distance=..1,scores={trigger_id=$(tp_id)}] positioned \
-    ^ ^ ^0.75 run function portal:helpers/view/trigger_1 {tp_id:$(tp_id)}
+    ^ ^ ^0.75 run function portal:helpers/view/trigger1 {tp_id:$(tp_id)}
